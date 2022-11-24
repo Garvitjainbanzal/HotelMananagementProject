@@ -1,9 +1,27 @@
 const { PrismaClient } = require('@prisma/client');
 const express = require('express');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
 const prisma = new PrismaClient();
 const app = new express();
 
+dotenv.config();
+
 app.use(express.json());
+
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+
+    if (token == null) return res.sendStatus(401)
+
+    jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403)
+
+        req.user = user;
+        next();
+    })
+}
 
 app.get('/home', (req, res) => {
     res.send('Welcome To Home Page');
@@ -17,12 +35,12 @@ app.post('/Account/createNewAccount', async (req, res) => {
     res.json(user)
 })
 
-app.get('/Account/login', async (req, res) => {
+app.get('/Account/login', authenticateToken, async (req, res, next) => {
     const { email, password } = req.params;
     const post = await prisma.User.findMany({
         where: { email: email, password: password },
     })
-    res.send(post)
+    res.send(post.filter(post => post.User.email === req.params.email))
 })
 
 app.delete('/Account/delete/:id', async (req, res) => {
@@ -47,15 +65,15 @@ app.put('/user/Record/publish/:id', async (req, res) => {
         where: { id: Number(id) },
         data: { published: true },
     })
-    res.json(post)
+    res.json(post.filter(post => post.Record.id === req.params))
 })
 
-app.get('/user/Record/id', async (req, res) => {
+app.get('/user/Record/id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const post = await prisma.Record.findMany({
         where: { id: id }
     })
-    res.send(post)
+    res.send(post.filter(post => post.Record.id === req.params));
 })
 
 app.delete('/user/Record/delete/:id', async (req, res) => {
