@@ -156,10 +156,6 @@ paths:
           description: Record not found.
 */
 
-app.get('/api-docs', (req, res) => {
-    res.send(data)
-})
-
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
