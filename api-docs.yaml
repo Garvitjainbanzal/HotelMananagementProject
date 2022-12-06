@@ -26,8 +26,6 @@ components:
       properties:
         id:
           type: integer
-        user:
-          type: object
         UserID:
           type: integer
         name:
@@ -42,10 +40,6 @@ components:
           type: boolean
       example:
         id: '1'
-        user:
-          id: '1'
-          email: example.user@xyz.com
-          password: password
         userID: '1'
         name: exampleUser
         stay: '2'
@@ -115,3 +109,43 @@ paths:
           description: Delete was successful.
         '404':
           description: Record not found.
+  /Account/login:
+    get:
+      summary: login 
+      tags: [User]
+      responses:
+        '200':
+          description: The profile.
+          content:
+            application/json:
+              schema:
+                $ref: '/home/Garvit/Documents/projectHotelManagement/prisma/schema.prisma'
+  /Account/createNewAccount:
+    post:
+      summary: Created account
+      tags: [User]
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                $ref: 'prisma/schema.prisma'
+      responses:
+        '201':
+          description: The created Record.
+  /Account/delete/{id}:
+    delete:
+      summary: Deletes a User by id
+      tags: [User]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The Record id
+      responses:
+        '204':
+          description: Delete was successful.
+        '404':
+          description: User not found.
